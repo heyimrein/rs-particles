@@ -38,10 +38,18 @@ fn window_conf() -> Conf {
 }
 
 
-#[derive(Default)]
-struct ParticleSystem {
+struct ParticleSystem<'a> {
     /// Particle container
-    particles: Vec<Particle>,
+    particles: Vec<&'a mut Particle>,
+
+    /// Position on-screen.
+    position: Vec2,
+
+    /// Whether system is currently emitting particles.
+    emitting: bool,
+
+    /// Gravitational force applied to each particle over time.
+    gravity: Vec2,
 
     /// Delta Time: time between last tick and current tick.
     dt: f32,
@@ -50,18 +58,18 @@ struct ParticleSystem {
     dt_prev_time: f32,
     /// Internal time cache.
     dt_time: SystemTime,
-
-    /// Whether system is currently emitting particles.
-    emitting: bool,
-
-    /// Gravitational force applied to each particle over time.
-    gravity: Vec2,
 }
 
-impl<'a> ParticleSystem {
+impl<'a> ParticleSystem<'_> {
     fn new() -> &'a mut Self {
         &mut ParticleSystem {
-            ..Default::default()
+            particles: vec![],
+            position: Vec2::ZERO,
+            emitting: true,
+            gravity: vec2(0., 0.),
+            dt: 0.,
+            dt_prev_time: 0.,
+            dt_time: SystemTime::now(),
         }
     }
 
@@ -72,12 +80,15 @@ impl<'a> ParticleSystem {
         self.dt_prev_time = cur;
 
         if self.dt_prev_time % 0.5 == 0. {
-            self.particles.push()
+            self.particles.push(
+                &mut Particle::new()
+                    .position(self.position)
+            )
         }
 
         let mut particles = &mut self.particles;
         for i in 0..particles.len() {
-            let particle = &mut particles[i];
+            let mut particle = &mut particles[i];
 
             particle.size -= self.dt * 50.;
             if particle.size <= 0. {
@@ -90,6 +101,12 @@ impl<'a> ParticleSystem {
         }
     }
 
+    /// Set `position` to `value`.
+    fn position(self: &mut Self, value: Vec2) -> &mut Self {
+        self.position = value;
+        return self;
+    }
+    
     /// Set `emitting` to `value`.
     fn emitting(self: &mut Self, value: bool) -> &mut Self {
         self.emitting = value;
@@ -100,19 +117,6 @@ impl<'a> ParticleSystem {
     fn gravity(self: &mut Self, value: Vec2) -> &mut Self {
         self.gravity = value;
         return self;
-    }
-}
-
-impl Default for ParticleSystem {
-    fn default() -> Self {
-        ParticleSystem {
-            particles: vec![],
-            emitting: true,
-            gravity: vec2(0., 0.),
-            dt: 0.,
-            dt_prev_time: 0.,
-            dt_time: SystemTime::now(),
-        }
     }
 }
 
@@ -127,7 +131,9 @@ struct Particle {
 impl Particle {
     fn new() -> Self {
         Particle {
-            ..Default::default()
+            position: Vec2::ZERO,
+            velocity: Vec2::ZERO,
+            size: 50.,
         }
     }
 
@@ -147,15 +153,5 @@ impl Particle {
     fn size(self: &mut Self, value: f32) -> &mut Self {
         self.size = value;
         return self;
-    }
-}
-
-impl Default for Particle {
-    fn default() -> Self {
-        Particle {
-            position: Vec2::ZERO,
-            velocity: Vec2::ZERO,
-            size: 50.,
-        }
     }
 }
