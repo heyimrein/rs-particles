@@ -13,10 +13,14 @@ async fn main() {
     let time = SystemTime::now();
     let mut prev_time = time.elapsed().unwrap().as_secs_f32();
 
+    // App loop
     loop {
         clear_background(BLACK);
+
+        // Delta time for use in 'ticking' methods
         let delta = time.elapsed().unwrap().as_secs_f32() - prev_time;
 
+        // Particle handling
         system.tick(delta);
         system.draw();
 
@@ -36,6 +40,7 @@ fn window_conf() -> Conf {
 }
 
 
+/// System with the sole purpose of handling Particles
 struct ParticleSystem {
     position: Vec2,
     emit_interval: f32,
@@ -44,6 +49,7 @@ struct ParticleSystem {
 }
 
 impl ParticleSystem {
+    /// Return a newly created `ParticleSystem`
     fn new() -> Self {
         ParticleSystem {
             position: vec2(0., 0.),
@@ -53,6 +59,7 @@ impl ParticleSystem {
         }
     }
 
+    /// Tick through every particle in `particles`
     fn tick(self: &mut Self, delta: f32) {
         self._interval_timer -= delta;
         if self._interval_timer < 0. {
@@ -60,6 +67,8 @@ impl ParticleSystem {
             self.particles.push(Particle::new());
         }
 
+        // Create a buffer for removed particles
+        // (to avoid modifying the length of `particles` while iterating)
         let mut rem_buffer: Vec<usize> = vec![];
         for i in 0..self.particles.len() {
             let particle = &mut self.particles[i];
@@ -73,6 +82,7 @@ impl ParticleSystem {
         }
     }
 
+    /// Draw every particle in `particles`
     fn draw(self: &mut Self) {
         for particle in &self.particles {
             draw_circle(
@@ -104,6 +114,7 @@ impl ParticleSystem {
 }
 
 
+/// Simple `Particle` for use in a `ParticleSystem`
 struct Particle {
     position: Vec2,
     velocity: Vec2,
@@ -112,6 +123,7 @@ struct Particle {
 }
 
 impl Particle {
+    /// Return a newly created `Particle`
     fn new() -> Self {
         Particle {
             position: vec2(0., 0.),
