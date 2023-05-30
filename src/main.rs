@@ -12,7 +12,7 @@ async fn main() {
     let win = window_conf();
     let mut system = ParticleSystem::new()
         .position(vec2(win.window_width as f32 / 2., win.window_height as f32 / 2.))
-        .initial_velocity(vec2(0., -100.));
+        .initial_velocity(vec2(0., -200.));
 
     let time = SystemTime::now();
     let mut prev_time = time.elapsed().unwrap().as_secs_f32();
@@ -23,6 +23,11 @@ async fn main() {
 
         // Delta time for use in 'ticking' methods
         let delta = time.elapsed().unwrap().as_secs_f32() - prev_time;
+
+        system.position = vec2(
+            (prev_time * 5.).sin() * 200. + win.window_width as f32 / 2.,
+            (prev_time * 10.).sin() * 100. + win.window_height as f32 / 2.
+        );
 
         // Particle handling
         system.tick(delta);
@@ -62,12 +67,12 @@ impl ParticleSystem {
         ParticleSystem {
             position: vec2(0., 0.),
             gravity: vec2(0., 100.),
-            emit_interval: 0.05,
+            emit_interval: 0.001,
             initial_velocity: vec2(0., 0.),
             randomize: true,
             rand_amount: 50.,
             particles: vec![],
-            _interval_timer: 0.5,
+            _interval_timer: 1.,
         }
     }
 
@@ -93,7 +98,7 @@ impl ParticleSystem {
         for i in 0..self.particles.len() {
             let particle = &mut self.particles[i];
 
-            particle.velocity += self.gravity * delta;
+            particle.velocity += self.gravity * 5. * delta;
             particle.position += particle.velocity * delta;
 
             particle.radius -= particle.decay_rate * delta;
@@ -159,7 +164,7 @@ impl Particle {
             position: vec2(0., 0.),
             velocity: vec2(0., 0.),
             radius: 8.,
-            decay_rate: 2.,
+            decay_rate: 8.,
         }
     }
 
