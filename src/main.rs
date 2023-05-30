@@ -7,8 +7,6 @@ use macroquad::rand::gen_range;
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    std::env::set_var("RUST_BACKTRACE", "1");
-
     let win = window_conf();
     let mut system = ParticleSystem::new()
         .position(vec2(win.window_width as f32 / 2., win.window_height as f32 / 2.))
