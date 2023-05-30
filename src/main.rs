@@ -67,7 +67,11 @@ impl ParticleSystem {
         self._interval_timer -= delta;
         if self._interval_timer < 0. {
             self._interval_timer = self.emit_interval;
-            self.particles.push(Particle::new().velocity(vec2(gen_range(-50., 50.), -200.)));
+            self.particles.push(
+                Particle::new()
+                    .position(self.position)
+                    .velocity(vec2(gen_range(-50., 50.), -200.))
+            );
         }
 
         // Create a buffer for removed particles
@@ -93,8 +97,8 @@ impl ParticleSystem {
     fn draw(self: &mut Self) {
         for particle in &self.particles {
             draw_circle(
-                self.position.x + particle.position.x,
-                self.position.y + particle.position.y,
+                particle.position.x,
+                particle.position.y,
                 particle.radius,
                 WHITE
             );
