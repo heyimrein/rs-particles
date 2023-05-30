@@ -24,6 +24,7 @@ async fn main() {
         // Delta time for use in 'ticking' methods
         let delta = time.elapsed().unwrap().as_secs_f32() - prev_time;
 
+        // Move ParticleSystem around for fun :p
         system.position = vec2(
             (prev_time * 5.).sin() * 200. + win.window_width as f32 / 2.,
             (prev_time * 10.).sin() * 100. + win.window_height as f32 / 2.
