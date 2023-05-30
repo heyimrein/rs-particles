@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::time::SystemTime;
 use macroquad::prelude::*;
 use macroquad::rand::gen_range;
@@ -9,7 +11,8 @@ async fn main() {
 
     let win = window_conf();
     let mut system = ParticleSystem::new()
-        .position(vec2(win.window_width as f32 / 2., win.window_height as f32 / 2.));
+        .position(vec2(win.window_width as f32 / 2., win.window_height as f32 / 2.))
+        .initial_velocity(vec2(0., -100.));
 
     let time = SystemTime::now();
     let mut prev_time = time.elapsed().unwrap().as_secs_f32();
@@ -46,6 +49,9 @@ struct ParticleSystem {
     position: Vec2,
     gravity: Vec2,
     emit_interval: f32,
+    initial_velocity: Vec2,
+    randomize: bool,
+    rand_amount: f32,
     particles: Vec<Particle>,
     _interval_timer: f32,
 }
@@ -57,6 +63,9 @@ impl ParticleSystem {
             position: vec2(0., 0.),
             gravity: vec2(0., 100.),
             emit_interval: 0.05,
+            initial_velocity: vec2(0., 0.),
+            randomize: true,
+            rand_amount: 50.,
             particles: vec![],
             _interval_timer: 0.5,
         }
@@ -67,11 +76,15 @@ impl ParticleSystem {
         self._interval_timer -= delta;
         if self._interval_timer < 0. {
             self._interval_timer = self.emit_interval;
-            self.particles.push(
-                Particle::new()
-                    .position(self.position)
-                    .velocity(vec2(gen_range(-50., 50.), -200.))
-            );
+
+            let mut x_vel = 0.;
+            if self.randomize {
+                x_vel = gen_range(-self.rand_amount, self.rand_amount);
+            }
+
+            self.particles.push(Particle::new()
+                .position(self.position)
+                .velocity(vec2(x_vel + self.initial_velocity.x, self.initial_velocity.y)));
         }
 
         // Create a buffer for removed particles
@@ -117,6 +130,12 @@ impl ParticleSystem {
         return self;
     }
 
+    /// Set `initial_velocity` to `value`.
+    fn initial_velocity(mut self: Self, value: Vec2) -> Self {
+        self.initial_velocity = value;
+        return self;
+    }
+    
     /// Set `particles` to `value`.
     fn particles(mut self: Self, value: Vec<Particle>) -> Self {
         self.particles = value;
