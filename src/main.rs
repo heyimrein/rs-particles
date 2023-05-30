@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 use macroquad::prelude::*;
+use macroquad::rand::gen_range;
 
 
 #[macroquad::main(window_conf)]
@@ -54,8 +55,8 @@ impl ParticleSystem {
     fn new() -> Self {
         ParticleSystem {
             position: vec2(0., 0.),
-            gravity: vec2(0., 10.),
-            emit_interval: 0.5,
+            gravity: vec2(0., 100.),
+            emit_interval: 0.05,
             particles: vec![],
             _interval_timer: 0.5,
         }
@@ -66,7 +67,7 @@ impl ParticleSystem {
         self._interval_timer -= delta;
         if self._interval_timer < 0. {
             self._interval_timer = self.emit_interval;
-            self.particles.push(Particle::new());
+            self.particles.push(Particle::new().velocity(vec2(gen_range(-50., 50.), -200.)));
         }
 
         // Create a buffer for removed particles
@@ -76,7 +77,7 @@ impl ParticleSystem {
             let particle = &mut self.particles[i];
 
             particle.velocity += self.gravity * delta;
-            particle.position += particle.velocity;
+            particle.position += particle.velocity * delta;
 
             particle.radius -= particle.decay_rate * delta;
             if particle.radius <= 0. {
@@ -135,13 +136,19 @@ impl Particle {
             position: vec2(0., 0.),
             velocity: vec2(0., 0.),
             radius: 8.,
-            decay_rate: 8.,
+            decay_rate: 2.,
         }
     }
 
     /// Set `position` to `value`.
     fn position(mut self: Self, value: Vec2) -> Self {
         self.position = value;
+        return self;
+    }
+
+    /// Set `velocity` to `value`.
+    fn velocity(mut self: Self, value: Vec2) -> Self {
+        self.velocity = value;
         return self;
     }
     
