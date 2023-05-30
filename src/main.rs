@@ -43,6 +43,7 @@ fn window_conf() -> Conf {
 /// System with the sole purpose of handling Particles
 struct ParticleSystem {
     position: Vec2,
+    gravity: Vec2,
     emit_interval: f32,
     particles: Vec<Particle>,
     _interval_timer: f32,
@@ -53,6 +54,7 @@ impl ParticleSystem {
     fn new() -> Self {
         ParticleSystem {
             position: vec2(0., 0.),
+            gravity: vec2(0., 10.),
             emit_interval: 0.5,
             particles: vec![],
             _interval_timer: 0.5,
@@ -72,6 +74,10 @@ impl ParticleSystem {
         let mut rem_buffer: Vec<usize> = vec![];
         for i in 0..self.particles.len() {
             let particle = &mut self.particles[i];
+
+            particle.velocity += self.gravity * delta;
+            particle.position += particle.velocity;
+
             particle.radius -= particle.decay_rate * delta;
             if particle.radius <= 0. {
                 rem_buffer.push(i);
