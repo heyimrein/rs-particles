@@ -71,7 +71,7 @@ impl ParticleSystem {
             randomize: true,
             rand_amount: 50.,
             particles: vec![],
-            _interval_timer: 1.,
+            _interval_timer: 0.001,
         }
     }
 
