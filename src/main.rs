@@ -14,6 +14,7 @@ async fn main() {
 
     let time = SystemTime::now();
     let mut prev_time = time.elapsed().unwrap().as_secs_f32();
+    let mut mouse_ctrl = false;
 
     // App loop
     loop {
@@ -22,11 +23,23 @@ async fn main() {
         // Delta time for use in 'ticking' methods
         let delta = time.elapsed().unwrap().as_secs_f32() - prev_time;
 
-        // Move ParticleSystem around for fun :p
-        system.position = vec2(
-            (prev_time * 5.).sin() * 200. + win.window_width as f32 / 2.,
-            (prev_time * 10.).sin() * 100. + win.window_height as f32 / 2.
-        );
+        // Handle Input
+        if is_mouse_button_pressed(MouseButton::Left) { mouse_ctrl = !mouse_ctrl }
+
+        // Move ParticleSystem
+        let mut position = if mouse_ctrl {
+            let mouse_pos = mouse_position();
+            vec2(
+                mouse_pos.0,
+                mouse_pos.1
+            )
+        } else {
+            vec2(
+                (prev_time * 5.).sin() * 200. + win.window_width as f32 / 2.,
+                (prev_time * 10.).sin() * 100. + win.window_height as f32 / 2.
+            )
+        };
+        system.position = position;
 
         // Particle handling
         system.tick(delta);
@@ -82,13 +95,18 @@ impl ParticleSystem {
             self._interval_timer = self.emit_interval;
 
             let mut x_vel = 0.;
+            let mut y_vel = 0.;
             if self.randomize {
                 x_vel = gen_range(-self.rand_amount, self.rand_amount);
+                y_vel = gen_range(-self.rand_amount * 2., self.rand_amount * 2.);
             }
 
             self.particles.push(Particle::new()
                 .position(self.position)
-                .velocity(vec2(x_vel + self.initial_velocity.x, self.initial_velocity.y)));
+                .velocity(vec2(
+                    x_vel + self.initial_velocity.x,
+                    y_vel + self.initial_velocity.y
+                )));
         }
 
         // Create a buffer for removed particles
